@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Calendar</string>
+    <string name="default_input_text">Write a note...</string>
+</resources>
