@@ -4,7 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -19,8 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private Button add_contact_button;
     private ListView listView;
     private List<ContactClass> contactClassList;
-    private ArrayAdapter<String> adapter;
-    private CustomListView customAdapter;
+    private CustomListViewAdapter customAdapter;
     DbAdapter helper;
 
     @Override
@@ -30,17 +33,18 @@ public class MainActivity extends AppCompatActivity {
 
         add_contact_button = findViewById(R.id.add_contact_button);
         listView = findViewById(R.id.list);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+        listView.setItemsCanFocus(false);
         helper = new DbAdapter(this);
         contactClassList = helper.getData();
 
-//        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, getContactNames());
-//        listView.setAdapter(adapter);
-
-        customAdapter = new CustomListView(this,
+        customAdapter = new CustomListViewAdapter(this,
                 R.layout.client_list,
                 contactClassList);
         listView.setAdapter(customAdapter);
 
+        // method for ADD button
         add_contact_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -49,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // method for item in list when clicked
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -67,12 +72,8 @@ public class MainActivity extends AppCompatActivity {
         if(requestCode == 1 && resultCode == RESULT_OK)
         {
             contactClassList = helper.getData();
-            contactClassList.clear();
-            customAdapter.notifyDataSetChanged();
+            customAdapter.UpdateDataSet(contactClassList);
         }
-        Toast.makeText(this, "requestCode = " + requestCode +
-                        "\nresultCode = " + resultCode,
-                Toast.LENGTH_LONG).show();
     }
 
     private ArrayList<Integer> getContactIDs()
