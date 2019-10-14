@@ -1,6 +1,7 @@
 package com.example.contacts;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -80,12 +82,5 @@ public class CustomListViewAdapter extends BaseAdapter {
     @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    private class ViewHolder
-    {
-        LinearLayout linearLayout;
-        CheckedTextView checkedTextView;
-        ImageView checkedImage;
     }
 }

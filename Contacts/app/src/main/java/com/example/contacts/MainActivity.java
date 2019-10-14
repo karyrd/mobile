@@ -22,7 +22,8 @@ public class MainActivity extends AppCompatActivity {
 
     private Button add_contact_button;
     private ListView listView;
-    private List<ContactClass> contactClassList;
+    private List<ContactClass> contactsList;
+    private List<ContactClass> selectedContactsList;
     private CustomListViewAdapter customAdapter;
     DbAdapter helper;
 
@@ -37,11 +38,12 @@ public class MainActivity extends AppCompatActivity {
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         listView.setItemsCanFocus(false);
         helper = new DbAdapter(this);
-        contactClassList = helper.getData();
+        contactsList = helper.getData();
+        selectedContactsList = new ArrayList<ContactClass>();
 
         customAdapter = new CustomListViewAdapter(this,
                 R.layout.client_list,
-                contactClassList);
+                contactsList);
         listView.setAdapter(customAdapter);
 
         // method for ADD button
@@ -59,8 +61,23 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(MainActivity.this, SelectedContactInfo.class);
-                intent.putStringArrayListExtra("selectedContact", contactClassList.get(position).getListOfAll());
+                intent.putStringArrayListExtra("selectedContact", contactsList.get(position).getListOfAll());
                 startActivityForResult(intent, 1);
+            }
+        });
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                String toastStr = "Selected contacts:";
+                ContactClass selectedContact = contactsList.get(position);
+                if(!selectedContactsList.contains(selectedContact))
+                    selectedContactsList.add(contactsList.get(position));
+                for (ContactClass contact : selectedContactsList)
+                    toastStr += "\n" + contact.getId();
+
+                Toast.makeText(MainActivity.this, toastStr, Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
     }
@@ -71,15 +88,15 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == 1 && resultCode == RESULT_OK)
         {
-            contactClassList = helper.getData();
-            customAdapter.UpdateDataSet(contactClassList);
+            contactsList = helper.getData();
+            customAdapter.UpdateDataSet(contactsList);
         }
     }
 
     private ArrayList<Integer> getContactIDs()
     {
         ArrayList<Integer> contactIDsList = new ArrayList<>();
-        for(ContactClass contact : contactClassList)
+        for(ContactClass contact : contactsList)
         {
             contactIDsList.add(contact.getId());
         }
@@ -88,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> getContactNames()
     {
         ArrayList<String> contactNamesList = new ArrayList<>();
-        for(ContactClass contact : contactClassList)
+        for(ContactClass contact : contactsList)
         {
             contactNamesList.add(contact.getName());
         }
@@ -97,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> getContactPhones()
     {
         ArrayList<String> contactPhonesList = new ArrayList<>();
-        for(ContactClass contact : contactClassList)
+        for(ContactClass contact : contactsList)
         {
             contactPhonesList.add(contact.getPhone());
         }
