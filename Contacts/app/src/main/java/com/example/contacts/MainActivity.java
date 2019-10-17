@@ -1,21 +1,17 @@
 package com.example.contacts;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import java.util.ArrayList;
+import androidx.appcompat.app.AppCompatActivity;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,9 +19,9 @@ public class MainActivity extends AppCompatActivity {
     private Button add_contact_button;
     private ListView listView;
     private List<ContactClass> contactsList;
-    private List<ContactClass> selectedContactsList;
     private CustomListViewAdapter customAdapter;
-    DbAdapter helper;
+    private ActionMode actionMode;
+    private DbAdapter helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,21 +35,11 @@ public class MainActivity extends AppCompatActivity {
         listView.setItemsCanFocus(false);
         helper = new DbAdapter(this);
         contactsList = helper.getData();
-        selectedContactsList = new ArrayList<ContactClass>();
 
         customAdapter = new CustomListViewAdapter(this,
                 R.layout.client_list,
                 contactsList);
         listView.setAdapter(customAdapter);
-
-        // method for ADD button
-        add_contact_button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddNewContactActivity.class);
-                startActivityForResult(intent, 1);
-            }
-        });
 
         // method for item in list when clicked
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -61,65 +47,101 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Intent intent = new Intent(MainActivity.this, SelectedContactInfo.class);
-                intent.putStringArrayListExtra("selectedContact", contactsList.get(position).getListOfAll());
+                intent.putStringArrayListExtra("selectedContact", customAdapter.getItem(position).getListOfAll());
                 startActivityForResult(intent, 1);
             }
         });
-
+        // method for long click selection
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                String toastStr = "Selected contacts:";
-                ContactClass selectedContact = contactsList.get(position);
-                if(!selectedContactsList.contains(selectedContact))
-                    selectedContactsList.add(contactsList.get(position));
-                for (ContactClass contact : selectedContactsList)
-                    toastStr += "\n" + contact.getId();
+                if(customAdapter.isContactSelectedForTheFirstTime(position)) {
+                    view.findViewById(R.id.client_list).setBackgroundColor(Color.YELLOW);
+                }
+                else {
+                    view.findViewById(R.id.client_list).setBackgroundColor(Color.TRANSPARENT);
+                }
 
-                Toast.makeText(MainActivity.this, toastStr, Toast.LENGTH_SHORT).show();
+                if(actionMode == null) {
+                    actionMode = startActionMode(actionModeCallback);
+                }
+
+                if(customAdapter.getSelectedElementsCount() > 0) {
+                    actionMode.setTitle("Selected " + customAdapter.getSelectedElementsCount() + " contact(s)");
+                }
+                else {
+                    actionMode.finish();
+                }
+
                 return true;
             }
         });
     }
-
+    private void UpdateData() {
+        contactsList = helper.getData();
+        customAdapter.UpdateDataSet(contactsList);
+    }
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == 1 && resultCode == RESULT_OK)
-        {
-            contactsList = helper.getData();
-            customAdapter.UpdateDataSet(contactsList);
-        }
+        UpdateData();
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case R.id.add_button:
+                Intent intent = new Intent(MainActivity.this, AddNewContactActivity.class);
+                startActivityForResult(intent, 1);
+        }
+        return(super.onOptionsItemSelected(menuItem));
+    }
+    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.action_mode_menu, menu);
+            return true;
+        }
 
-    private ArrayList<Integer> getContactIDs()
-    {
-        ArrayList<Integer> contactIDsList = new ArrayList<>();
-        for(ContactClass contact : contactsList)
-        {
-            contactIDsList.add(contact.getId());
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
         }
-        return contactIDsList;
-    }
-    private ArrayList<String> getContactNames()
-    {
-        ArrayList<String> contactNamesList = new ArrayList<>();
-        for(ContactClass contact : contactsList)
-        {
-            contactNamesList.add(contact.getName());
-        }
-        return contactNamesList;
-    }
-    private ArrayList<String> getContactPhones()
-    {
-        ArrayList<String> contactPhonesList = new ArrayList<>();
-        for(ContactClass contact : contactsList)
-        {
-            contactPhonesList.add(contact.getPhone());
-        }
-        return contactPhonesList;
-    }
 
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            if(item.getItemId() == R.id.delete_button) {
+                try {
+                    for (ContactClass contact : customAdapter.getSelectedContactsList()) {
+                        helper.delete(contact.getId());
+                        customAdapter.removeSelection();
+                    }
 
+                    UpdateData();
+                    Toast.makeText(MainActivity.this,
+                            "Selected contacts have been deleted",
+                            Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                catch (Exception ex) {
+                    Toast.makeText(MainActivity.this,
+                            "An error occurred while deleting selected contacts: " +
+                            ex.toString(),
+                            Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            actionMode = null;
+        }
+    };
 }

@@ -40,9 +40,9 @@ public class AddNewContactActivity extends AppCompatActivity {
 
         try
         {
-            long id = helper.insertData(new_name, new_email, new_location,
+            boolean isInserted = helper.insertData(new_name, new_email, new_location,
                                 new_phone, new_social_network);
-            if(id <= 0)
+            if(!isInserted)
             {
                 Toast.makeText(this, "An error occurred! Couldn't add a new contact",
                         Toast.LENGTH_LONG).show();
