@@ -8,12 +8,17 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 public class AddNewContactActivity extends AppCompatActivity {
 
     private EditText name, email, phone, location, social_network;
     private DbAdapter helper;
-    private ContactClass contactClass;
     private Intent intent;
+
+    static final String NEW_CONTACT_INFO = "newContactInfoForSaveInstance";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,4 +67,27 @@ public class AddNewContactActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle bundle) {
+        bundle.putStringArrayList(NEW_CONTACT_INFO, new ArrayList<String>(
+                Arrays.asList(name.getText().toString(),
+                        email.getText().toString(),
+                        phone.getText().toString(),
+                        location.getText().toString(),
+                        social_network.getText().toString())
+        ));
+
+        super.onSaveInstanceState(bundle);
+    }
+    @Override
+    protected void onRestoreInstanceState(Bundle bundle) {
+        super.onRestoreInstanceState(bundle);
+
+        ArrayList<String> savedArray = bundle.getStringArrayList(NEW_CONTACT_INFO);
+        name.setText(savedArray.get(0));
+        email.setText(savedArray.get(1));
+        phone.setText(savedArray.get(2));
+        location.setText(savedArray.get(3));
+        social_network.setText(savedArray.get(4));
+    }
 }

@@ -8,12 +8,15 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class SelectedContactInfo extends AppCompatActivity {
 
@@ -30,6 +33,8 @@ public class SelectedContactInfo extends AppCompatActivity {
     private TextView locationField;
     private TextView social_networkField;
     private DbAdapter helper;
+
+    static final String CONTACT_INFO = "contactDataForSaveInstance";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +56,7 @@ public class SelectedContactInfo extends AppCompatActivity {
         locationField.setText(contactInfoList.get(4));
         social_networkField.setText(contactInfoList.get(5));
         helper = new DbAdapter(this);
+        SetNewValues();
 
         nameField.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -62,7 +68,10 @@ public class SelectedContactInfo extends AppCompatActivity {
         emailField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                OpenExternalApp(Uri.parse(contactInfoList.get(2)), Intent.ACTION_SEND);
+                Intent emailIntent = new Intent(Intent.ACTION_SEND);
+                emailIntent.putExtra(Intent.EXTRA_EMAIL, email);
+                emailIntent.setType("message/rfc822");
+                startActivity(Intent.createChooser(emailIntent, "Choose an app"));
             }
         });
         emailField.setOnLongClickListener(new View.OnLongClickListener() {
@@ -75,7 +84,7 @@ public class SelectedContactInfo extends AppCompatActivity {
         phoneField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                OpenExternalApp(Uri.parse("tel:" + contactInfoList.get(3)), Intent.ACTION_DIAL);
+                OpenExternalApp(Uri.parse("tel:" + phone), Intent.ACTION_DIAL);
             }
         });
         phoneField.setOnLongClickListener(new View.OnLongClickListener() {
@@ -88,7 +97,7 @@ public class SelectedContactInfo extends AppCompatActivity {
         locationField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                OpenExternalApp(Uri.parse("geo:" + contactInfoList.get(4)), Intent.ACTION_VIEW);
+                OpenExternalApp(Uri.parse("https://maps.google.co.in/maps?q=" + location), Intent.ACTION_VIEW);
             }
         });
         locationField.setOnLongClickListener(new View.OnLongClickListener() {
@@ -101,7 +110,7 @@ public class SelectedContactInfo extends AppCompatActivity {
         social_networkField.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                OpenExternalApp(Uri.parse(contactInfoList.get(5)), Intent.ACTION_VIEW);
+                OpenExternalApp(Uri.parse(social_network), Intent.ACTION_VIEW);
             }
         });
         social_networkField.setOnLongClickListener(new View.OnLongClickListener() {
@@ -169,5 +178,29 @@ public class SelectedContactInfo extends AppCompatActivity {
         catch (Exception ex) {
             return false;
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle state) {
+        state.putStringArrayList(CONTACT_INFO, new ArrayList<String>(
+                Arrays.asList(nameField.getText().toString(),
+                        emailField.getText().toString(),
+                        phoneField.getText().toString(),
+                        locationField.getText().toString(),
+                        social_networkField.getText().toString())
+        ));
+
+        super.onSaveInstanceState(state);
+    }
+    @Override
+    protected void onRestoreInstanceState(Bundle state) {
+        super.onRestoreInstanceState(state);
+
+        ArrayList<String> savedArray = state.getStringArrayList(CONTACT_INFO);
+        nameField.setText(savedArray.get(0));
+        emailField.setText(savedArray.get(1));
+        phoneField.setText(savedArray.get(2));
+        locationField.setText(savedArray.get(3));
+        social_networkField.setText(savedArray.get(4));
     }
 }

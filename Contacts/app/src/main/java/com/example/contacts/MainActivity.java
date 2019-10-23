@@ -8,17 +8,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button add_contact_button;
     private ListView listView;
     private List<ContactClass> contactsList;
+    private List<View> highlightedContactsViews;
     private CustomListViewAdapter customAdapter;
     private ActionMode actionMode;
     private DbAdapter helper;
@@ -28,13 +29,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        add_contact_button = findViewById(R.id.add_contact_button);
         listView = findViewById(R.id.list);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         listView.setItemsCanFocus(false);
         helper = new DbAdapter(this);
         contactsList = helper.getData();
+        highlightedContactsViews = new ArrayList<>();
 
         customAdapter = new CustomListViewAdapter(this,
                 R.layout.client_list,
@@ -55,11 +56,14 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                View selectedView = view.findViewById(R.id.client_list);
                 if(customAdapter.isContactSelectedForTheFirstTime(position)) {
-                    view.findViewById(R.id.client_list).setBackgroundColor(Color.YELLOW);
+                    selectedView.setBackgroundColor(Color.YELLOW);
+                    highlightedContactsViews.add(selectedView);
                 }
                 else {
-                    view.findViewById(R.id.client_list).setBackgroundColor(Color.TRANSPARENT);
+                    selectedView.setBackgroundColor(Color.TRANSPARENT);
+                    highlightedContactsViews.remove(selectedView);
                 }
 
                 if(actionMode == null) {
@@ -116,24 +120,41 @@ public class MainActivity extends AppCompatActivity {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             if(item.getItemId() == R.id.delete_button) {
                 try {
-                    for (ContactClass contact : customAdapter.getSelectedContactsList()) {
-                        helper.delete(contact.getId());
-                        customAdapter.removeSelection();
-                    }
-
+                    DeleteHighlightedContacts();
+                    ClearHighlightedContacts();
                     UpdateData();
+
                     Toast.makeText(MainActivity.this,
                             "Selected contacts have been deleted",
                             Toast.LENGTH_SHORT).show();
                     return true;
                 }
                 catch (Exception ex) {
+                    ClearHighlightedContacts();
                     Toast.makeText(MainActivity.this,
                             "An error occurred while deleting selected contacts: " +
                             ex.toString(),
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_LONG).show();
+
                     return false;
                 }
+            }
+            if(item.getItemId() == R.id.forward_button) {
+                try {
+                    Intent intent = new Intent(MainActivity.this, MultipleSelectedContactsInfo.class);
+                    PassHighlightedContacts(intent);
+                    startActivityForResult(intent, 1);
+                }
+                catch (Exception ex) {
+                    ClearHighlightedContacts();
+                    Toast.makeText(MainActivity.this,
+                            "An error occurred while trying to access selected contacts all at once: " +
+                                    ex.toString(),
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+            if(actionMode != null) {
+                actionMode.finish();
             }
 
             return false;
@@ -144,4 +165,43 @@ public class MainActivity extends AppCompatActivity {
             actionMode = null;
         }
     };
+
+    private boolean ClearHighlightedContacts() {
+        try {
+            for (View highlightedView : highlightedContactsViews) {
+                highlightedView.setBackgroundColor(Color.TRANSPARENT);
+                customAdapter.removeSelection();
+            }
+
+            return true;
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+    private boolean DeleteHighlightedContacts() {
+        try {
+            for (ContactClass contact : customAdapter.getSelectedContactsList()) {
+                helper.delete(contact.getId());
+            }
+            return true;
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
+    private boolean PassHighlightedContacts(Intent intent) {
+        try {
+            int i = 0;
+            for (ContactClass contact : customAdapter.getSelectedContactsList()) {
+                intent.putStringArrayListExtra("selectedContact" + i, contact.getListOfAll());
+                i++;
+            }
+            intent.putExtra("amountOfSelectedContacts", i);
+            return true;
+        }
+        catch (Exception ex) {
+            return false;
+        }
+    }
 }
