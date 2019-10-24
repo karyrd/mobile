@@ -45,8 +45,9 @@ public class MainActivity extends AppCompatActivity {
         calendarView = findViewById(R.id.calendar);
         inputText = findViewById(R.id.textinput);
 
-        notes = new ArrayList<>();
         notes = JSONHelper.importFromJSON(this);
+        if(notes == null)
+            notes = new ArrayList<>();
         daynotes = new ArrayList<>();
         dayadapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, daynotes);
         selected_date = calendarView.getDate();
@@ -188,21 +189,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "An error occurred while saving notes", Toast.LENGTH_LONG).show();
         }
     }
-
-    /*public void OpenNotes()
-    {
-        if(notes != null)
-        {
-            adapter = new ArrayAdapter<>
-                    (this, android.R.layout.simple_list_item_1, notes);
-            listView.setAdapter(adapter);
-        }
-        else
-        {
-            Toast.makeText(this, "An error occurred while getting saved notes",
-                    Toast.LENGTH_LONG).show();
-        }
-    }*/
 
     public void ImportSelectedDateNotes()
     {
