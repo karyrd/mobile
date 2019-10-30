@@ -57,4 +57,14 @@ public class ContactClass {
         list.add(getSocialNetwork());
         return list;
     }
+    public ArrayList<String> getListOfAllMinusID()
+    {
+        ArrayList<String> list = new ArrayList<>();
+        list.add(getName());
+        list.add(getEmail());
+        list.add(getPhone());
+        list.add(getLocation());
+        list.add(getSocialNetwork());
+        return list;
+    }
 }

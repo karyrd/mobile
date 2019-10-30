@@ -12,8 +12,8 @@
         <activity android:name=".SelectedContactInfo"></activity>
         <activity android:name=".AddNewContactActivity"></activity>
         <activity android:name=".MultipleSelectedContactsInfo"></activity>
-        <activity android:name=".AccountActivity"></activity>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".AccountActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

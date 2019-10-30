@@ -14,4 +14,11 @@
         android:layout_weight="10"
         android:choiceMode="multipleChoice"/>
 
+    <Button
+        android:id="@+id/test_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="90"
+        android:text="test button"/>
+
 </LinearLayout>

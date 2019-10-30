@@ -1,8 +1,8 @@
 package com.example.contacts;
-
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,7 +11,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     private CustomListViewAdapter customAdapter;
     private ActionMode actionMode;
     private DbAdapter helper;
+    private FirebaseDBAdapter firebaseadapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         helper = new DbAdapter(this);
         contactsList = helper.getData();
         highlightedContactsViews = new ArrayList<>();
+        firebaseadapter = new FirebaseDBAdapter();
 
         customAdapter = new CustomListViewAdapter(this,
                 R.layout.client_list,
@@ -80,11 +81,25 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        findViewById(R.id.test_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for(ContactClass contact : contactsList) {
+//                    firebaseadapter.Save(contact.getListOfAllMinusID());
+                    firebaseadapter.Read();
+                    Log.d("asd", "############################" +
+                            contact.getListOfAll());
+                }
+            }
+        });
     }
+
     private void UpdateData() {
         contactsList = helper.getData();
         customAdapter.UpdateDataSet(contactsList);
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

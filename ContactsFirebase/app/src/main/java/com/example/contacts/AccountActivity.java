@@ -36,6 +36,9 @@ public class AccountActivity extends AppCompatActivity {
         signUpButton = findViewById(R.id.signUpButton);
         mAuth = FirebaseAuth.getInstance();
 
+        emailField.setText("trylyalya144@yandex.by");
+        passwordField.setText("123456");
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -59,6 +62,7 @@ public class AccountActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT)
                             .show();
                 }
+                Log.d("asd", mAuth.toString());
             }
         });
         signUpButton.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +76,7 @@ public class AccountActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT)
                             .show();
                 }
+                Log.d("asd", mAuth.toString());
             }
         });
     }
