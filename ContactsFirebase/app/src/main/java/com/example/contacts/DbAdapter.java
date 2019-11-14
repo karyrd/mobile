@@ -33,7 +33,7 @@ public class DbAdapter {
         }
     }
 
-    public static ArrayList<ContactClass> getData() {
+    public ArrayList<ContactClass> getData() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ArrayList<ContactClass> contactsList = new ArrayList<>();
         String[] columns = { DbHelper.ID, DbHelper.NAME, DbHelper.EMAIL,
@@ -50,21 +50,21 @@ public class DbAdapter {
             String social_network = cursor.getString(cursor.getColumnIndex(DbHelper.SOCIAL_NETWORKS));
             buffer.append(id + ";" + name + ";" + email + ";" + location +
                     ";" + phone + ";" + social_network + "\n");
-            contactsList.add(new ContactClass(id, name, email, location, phone, social_network));
+            contactsList.add(new ContactClass(String.valueOf(id), name, email, location, phone, social_network));
         }
 
         return contactsList;
     }
 
-    public int delete(long id) {
+    public int delete(String id) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String[] whereArgs = {String.valueOf(id)};
+        String[] whereArgs = {id};
 
         int count = db.delete(DbHelper.TABLE_NAME ,DbHelper.ID + " = ?", whereArgs);
         return count;
     }
 
-    public boolean update(long id, String name, String email, String location,
+    public boolean update(String id, String name, String email, String location,
                       String phone, String social_network) {
         try {
             SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -74,7 +74,7 @@ public class DbAdapter {
             contentValues.put(dbHelper.LOCATION, location);
             contentValues.put(dbHelper.PHONE, phone);
             contentValues.put(dbHelper.SOCIAL_NETWORKS, social_network);
-            String[] whereArgs = {String.valueOf(id)};
+            String[] whereArgs = {id};
             db.update(DbHelper.TABLE_NAME, contentValues, DbHelper.ID + " = ?", whereArgs);
             return true;
         }

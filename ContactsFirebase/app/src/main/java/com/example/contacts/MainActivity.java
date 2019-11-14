@@ -2,7 +2,6 @@ package com.example.contacts;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,10 +32,9 @@ public class MainActivity extends AppCompatActivity {
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
         listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         listView.setItemsCanFocus(false);
-        helper = new DbAdapter(this);
-        contactsList = helper.getData();
-        highlightedContactsViews = new ArrayList<>();
         firebaseadapter = new FirebaseDBAdapter();
+        contactsList = firebaseadapter.contactsArray;
+        highlightedContactsViews = new ArrayList<>();
 
         customAdapter = new CustomListViewAdapter(this,
                 R.layout.client_list,
@@ -81,22 +79,18 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
-
         findViewById(R.id.test_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                for(ContactClass contact : contactsList) {
-//                    firebaseadapter.Save(contact.getListOfAllMinusID());
-                    firebaseadapter.Read();
-                    Log.d("asd", "############################" +
-                            contact.getListOfAll());
-                }
+                UpdateData();
             }
         });
+        UpdateData();
     }
 
     private void UpdateData() {
-        contactsList = helper.getData();
+//        contactsList = helper.getData();
+        contactsList = firebaseadapter.contactsArray;
         customAdapter.UpdateDataSet(contactsList);
     }
 
@@ -215,7 +209,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean DeleteHighlightedContacts() {
         try {
             for (ContactClass contact : customAdapter.getSelectedContactsList()) {
-                helper.delete(contact.getId());
+//                helper.delete(contact.getId());
+                firebaseadapter.DeleteContact(contact.getId());
             }
             return true;
         }

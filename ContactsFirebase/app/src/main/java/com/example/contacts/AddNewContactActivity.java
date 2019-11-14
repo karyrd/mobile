@@ -16,6 +16,7 @@ public class AddNewContactActivity extends AppCompatActivity {
 
     private EditText name, email, phone, location, social_network;
     private DbAdapter helper;
+    private FirebaseDBAdapter firebaseDBAdapter;
     private Intent intent;
 
     static final String NEW_CONTACT_INFO = "newContactInfoForSaveInstance";
@@ -33,6 +34,7 @@ public class AddNewContactActivity extends AppCompatActivity {
         social_network = findViewById(R.id.social_network_value);
 
         helper = new DbAdapter(this);
+        firebaseDBAdapter = new FirebaseDBAdapter();
     }
 
     public void addContact(View view)
@@ -45,18 +47,9 @@ public class AddNewContactActivity extends AppCompatActivity {
 
         try
         {
-            boolean isInserted = helper.insertData(new_name, new_email, new_location,
-                                new_phone, new_social_network);
-            if(!isInserted)
-            {
-                Toast.makeText(this, "An error occurred! Couldn't add a new contact",
-                        Toast.LENGTH_LONG).show();
-            }
-            else
-            {
-                Toast.makeText(this, "New contact has been added",
-                        Toast.LENGTH_LONG).show();
-            }
+            ContactClass newContact = new ContactClass(new_name, new_email,
+                    new_location, new_phone, new_social_network);
+            firebaseDBAdapter.Save(newContact);
             setResult(RESULT_OK, intent);
             finish();
         }

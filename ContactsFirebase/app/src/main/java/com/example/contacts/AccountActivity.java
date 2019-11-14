@@ -44,9 +44,9 @@ public class AccountActivity extends AppCompatActivity {
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if(user != null) {
-                    Log.d("asd", "signed in: " + user.getUid());
+                    Log.d("##SIGN IN##", "signed in: " + user.getUid());
                 } else {
-                    Log.d("asd", "signed out");
+                    Log.d("##SIGN OUT##", "signed out");
                 }
             }
         };
@@ -62,7 +62,6 @@ public class AccountActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT)
                             .show();
                 }
-                Log.d("asd", mAuth.toString());
             }
         });
         signUpButton.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +75,6 @@ public class AccountActivity extends AppCompatActivity {
                             Toast.LENGTH_SHORT)
                             .show();
                 }
-                Log.d("asd", mAuth.toString());
             }
         });
     }

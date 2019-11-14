@@ -20,7 +20,7 @@ import java.util.List;
 
 public class SelectedContactInfo extends AppCompatActivity {
 
-    private long id;
+    private String id;
     private String name;
     private String email;
     private String phone;
@@ -33,6 +33,7 @@ public class SelectedContactInfo extends AppCompatActivity {
     private TextView locationField;
     private TextView social_networkField;
     private DbAdapter helper;
+    private FirebaseDBAdapter firebaseDBAdapter;
 
     static final String CONTACT_INFO = "contactDataForSaveInstance";
 
@@ -49,13 +50,14 @@ public class SelectedContactInfo extends AppCompatActivity {
 
         final ArrayList<String> contactInfoList = getIntent().getStringArrayListExtra("selectedContact");
 
-        id = Long.parseLong(contactInfoList.get(0));
+        id = contactInfoList.get(0);
         nameField.setText(contactInfoList.get(1));
         emailField.setText(contactInfoList.get(2));
         phoneField.setText(contactInfoList.get(3));
         locationField.setText(contactInfoList.get(4));
         social_networkField.setText(contactInfoList.get(5));
         helper = new DbAdapter(this);
+        firebaseDBAdapter = new FirebaseDBAdapter();
         SetNewValues();
 
         nameField.setOnLongClickListener(new View.OnLongClickListener() {
@@ -143,16 +145,21 @@ public class SelectedContactInfo extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 selectedElement.setText(input.getText().toString());
                 SetNewValues();
-                if(helper.update(id, name, email, location, phone, social_network)) {
-                    Toast.makeText(SelectedContactInfo.this,
+//                if(helper.update(id, name, email, location, phone, social_network)) {
+//                    Toast.makeText(SelectedContactInfo.this,
+//                            "Data successfully changed",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+//                else {
+//                    Toast.makeText(SelectedContactInfo.this,
+//                            "An error occurred",
+//                            Toast.LENGTH_SHORT).show();
+//                }
+                firebaseDBAdapter.Update(new ContactClass(name, email, location,
+                        phone, social_network), id);
+                Toast.makeText(SelectedContactInfo.this,
                             "Data successfully changed",
                             Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    Toast.makeText(SelectedContactInfo.this,
-                            "An error occurred",
-                            Toast.LENGTH_SHORT).show();
-                }
 
                 dialog.dismiss();
             }

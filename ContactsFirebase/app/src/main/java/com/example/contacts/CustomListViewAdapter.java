@@ -50,7 +50,7 @@ public class CustomListViewAdapter extends BaseAdapter {
         TextView phone = rowView.findViewById(R.id.client_phone);
 
         ContactClass contact = getItem(position);
-        id.setText(contact.getId().toString());
+        id.setText(contact.getId());
         name.setText(contact.getName());
         phone.setText(contact.getPhone());
 
